@@ -21,7 +21,7 @@ export function Topbar() {
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white text-xs font-semibold flex items-center justify-center">R</div>
           <div className="text-sm">
             <p className="font-medium leading-none">Rodrigo Silva</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Gerente de Logística</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Administrador</p>
           </div>
         </div>
       </div>
