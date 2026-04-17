@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 
 export function Topbar() {
   return (
-    <header className="h-14 border-b bg-white sticky top-0 z-10 px-6 flex items-center gap-4">
+    <header className="h-14 border-b bg-white sticky top-0 z-10 px-6 flex items-center gap-4 justify-end">
       <div className="flex-1 max-w-md relative">
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Buscar pedido, CT-e, cliente, motorista..." className="pl-9 h-9 bg-slate-50 border-slate-200" />
