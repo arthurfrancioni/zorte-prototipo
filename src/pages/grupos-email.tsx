@@ -5,8 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Mail, Users2, Edit2, Trash2, Send } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { gruposEmail, cargas, motoristas, veiculos } from "@/lib/mock-data";
+import { useProfile } from "@/lib/profile-context";
 
 export function GruposEmail() {
+  const { capabilities } = useProfile();
+  const canEdit = capabilities.canEdit("grupos_email");
   const [selected, setSelected] = useState(gruposEmail[0].id);
   const grupo = gruposEmail.find(g => g.id === selected)!;
   const motorista = motoristas.find(m => m.id === cargas[0].motoristaId);
@@ -18,7 +21,7 @@ export function GruposEmail() {
         title="Grupos de E-mail"
         description="Cadastre grupos de destinatários por operação ou região e personalize templates"
         badge={{ label: "Fase 1", variant: "phase1" }}
-        actions={<Button size="sm"><Plus className="w-3.5 h-3.5 mr-1.5" />Novo grupo</Button>}
+        actions={<Button size="sm" disabled={!canEdit} title={!canEdit ? "Somente leitura" : undefined}><Plus className="w-3.5 h-3.5 mr-1.5" />Novo grupo</Button>}
       />
 
       <div className="grid grid-cols-[340px_1fr] gap-4">
@@ -51,8 +54,8 @@ export function GruposEmail() {
                 <p className="text-xs text-muted-foreground mt-0.5">{grupo.descricao}</p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline"><Edit2 className="w-3.5 h-3.5 mr-1.5" />Editar</Button>
-                <Button size="sm" variant="outline" className="text-rose-600 hover:text-rose-700"><Trash2 className="w-3.5 h-3.5" /></Button>
+                <Button size="sm" variant="outline" disabled={!canEdit}><Edit2 className="w-3.5 h-3.5 mr-1.5" />Editar</Button>
+                <Button size="sm" variant="outline" disabled={!canEdit} className="text-rose-600 hover:text-rose-700"><Trash2 className="w-3.5 h-3.5" /></Button>
               </div>
             </div>
 
@@ -67,7 +70,7 @@ export function GruposEmail() {
                     </div>
                   ))}
                 </div>
-                <Button size="sm" variant="ghost" className="w-full mt-2"><Plus className="w-3.5 h-3.5 mr-1.5" />Adicionar e-mail</Button>
+                <Button size="sm" variant="ghost" className="w-full mt-2" disabled={!canEdit}><Plus className="w-3.5 h-3.5 mr-1.5" />Adicionar e-mail</Button>
               </div>
 
               <div>
@@ -92,7 +95,7 @@ export function GruposEmail() {
                 <h3 className="text-sm font-semibold">Preview do template</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">Este é o e-mail que será disparado automaticamente ao formar uma carga com este grupo</p>
               </div>
-              <Button size="sm" variant="outline"><Send className="w-3.5 h-3.5 mr-1.5" />Enviar teste</Button>
+              <Button size="sm" variant="outline" disabled={!canEdit}><Send className="w-3.5 h-3.5 mr-1.5" />Enviar teste</Button>
             </div>
 
             <div className="border rounded-lg overflow-hidden">

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(kill %1)",
+      "Bash(wait)",
+      "Bash(git mv *)",
+      "Bash(npx tsc *)",
+      "Bash(powershell -Command \"Stop-Process -Name 'node' -ErrorAction SilentlyContinue\")",
+      "Bash(ls C:/Users/arthu/.claude/projects/c--Users-arthu-Documents-Utilitarios-Dev-zorte-prototipo/memory/ 2>/dev/null)",
+      "Read(//c/Users/arthu/.claude/projects/c--Users-arthu-Documents-Utilitarios-Dev-zorte-prototipo/memory/**)",
+      "Bash(mkdir -p \"C:/Users/arthu/.claude/projects/c--Users-arthu-Documents-Utilitarios-Dev-zorte-prototipo/memory\" 2>&1)",
+      "Bash(until grep *)",
+      "Read(//c/Users/arthu/AppData/Local/Temp/claude/c--Users-arthu-Documents-Utilitarios-Dev-zorte-prototipo/4c6624a2-9831-4d52-912a-e0215a79c2a1/tasks/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\arthu\\.claude\\projects\\c--Users-arthu-Documents-Utilitarios-Dev-zorte-prototipo\\memory"
+    ]
+  }
+}

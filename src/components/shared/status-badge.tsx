@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type Variant = "recebido" | "programado" | "liberado" | "em_carga" | "entregue" | "cancelado" | "redespacho" |
+type Variant = "recebido" | "programado" | "liberado" | "em_carga" | "aguardando_nfe" | "entregue" | "cancelado" | "redespacho" |
   "pronta" | "em_transito" | "finalizada" | "cancelada" | "autorizado" | "pendente" | "rejeitado";
 
 const configs: Record<Variant, { label: string; className: string }> = {
@@ -8,6 +8,7 @@ const configs: Record<Variant, { label: string; className: string }> = {
   programado: { label: "Programado", className: "bg-amber-100 text-amber-800" },
   liberado: { label: "Liberado", className: "bg-emerald-100 text-emerald-800" },
   em_carga: { label: "Em Carga", className: "bg-violet-100 text-violet-800" },
+  aguardando_nfe: { label: "Aguardando NFe", className: "bg-orange-100 text-orange-800" },
   entregue: { label: "Entregue", className: "bg-green-100 text-green-800" },
   cancelado: { label: "Cancelado", className: "bg-rose-100 text-rose-800" },
   redespacho: { label: "Redespacho", className: "bg-sky-100 text-sky-800" },

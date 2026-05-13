@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, CheckCircle2, Clock, AlertCircle, RefreshCw, Eye } from "lucide-react";
+import { FileText, Download, CheckCircle2, Clock, AlertCircle, RefreshCw, Eye, Info } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -136,53 +136,133 @@ export function CTes() {
   );
 }
 
+// Deriva múltiplos MDF-es por carga: a ANTT exige um manifesto por UF de descarga
+type MdfeDerivado = {
+  numero: string;
+  cargaNumero: string;
+  cargaId: string;
+  ufOrigem: string;
+  ufDestino: string;
+  cteIds: string[];
+  pesoTotal: number;
+  valorTotal: number;
+  status: "autorizado" | "encerrado";
+  dataEmissao: string;
+};
+
+function derivarMdfesPorEstado(): MdfeDerivado[] {
+  const lista: MdfeDerivado[] = [];
+  for (const carga of cargas) {
+    if (!carga.ctes || carga.ctes.length === 0) continue;
+    const ctesDaCarga = ctes.filter(c => carga.ctes!.includes(c.id));
+    const porUf = new Map<string, typeof ctesDaCarga>();
+    for (const cte of ctesDaCarga) {
+      const arr = porUf.get(cte.ufDestino) ?? [];
+      arr.push(cte);
+      porUf.set(cte.ufDestino, arr);
+    }
+    let i = 0;
+    for (const [uf, agrupados] of porUf) {
+      const seq = (++i).toString().padStart(2, "0");
+      lista.push({
+        numero: `MDFE-${carga.numero.replace("CRG-", "")}-${uf}${seq}`,
+        cargaNumero: carga.numero,
+        cargaId: carga.id,
+        ufOrigem: carga.ufOrigem,
+        ufDestino: uf,
+        cteIds: agrupados.map(c => c.id),
+        pesoTotal: agrupados.reduce((s, c) => s + c.pesoKg, 0),
+        valorTotal: agrupados.reduce((s, c) => s + c.valorFrete, 0),
+        status: carga.status === "finalizada" ? "encerrado" : "autorizado",
+        dataEmissao: carga.dataSaida,
+      });
+    }
+  }
+  return lista.sort((a, b) => {
+    if (a.cargaNumero !== b.cargaNumero) return b.cargaNumero.localeCompare(a.cargaNumero);
+    return a.ufDestino.localeCompare(b.ufDestino);
+  });
+}
+
 export function MDFE() {
-  const mdfes = cargas.filter(c => c.mdfe).map(c => ({
-    numero: c.mdfe!,
-    carga: c.numero,
-    cargaId: c.id,
-    ufOrigem: c.ufOrigem,
-    ctes: c.ctes?.length ?? 0,
-    status: c.status === "finalizada" ? "encerrado" : "autorizado",
-    dataEmissao: c.dataSaida,
-  }));
+  const mdfes = derivarMdfesPorEstado();
+
+  // Agrupa visualmente por carga
+  const porCarga = new Map<string, MdfeDerivado[]>();
+  for (const m of mdfes) {
+    const arr = porCarga.get(m.cargaNumero) ?? [];
+    arr.push(m);
+    porCarga.set(m.cargaNumero, arr);
+  }
 
   return (
     <div>
       <PageHeader
         title="MDF-e"
-        description="Manifesto Eletrônico de Documentos Fiscais · placa travada após vínculo"
+        description="Manifesto Eletrônico de Documentos Fiscais · um manifesto por UF de destino (separação automática)"
         badge={{ label: "Fase 2", variant: "phase2" }}
       />
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Número MDF-e</TableHead>
-              <TableHead>Carga vinculada</TableHead>
-              <TableHead>UF origem</TableHead>
-              <TableHead className="text-right">CT-e no manifesto</TableHead>
-              <TableHead>Data emissão</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mdfes.map(m => (
-              <TableRow key={m.numero}>
-                <TableCell className="font-mono text-blue-600 font-medium">{m.numero}</TableCell>
-                <TableCell className="font-mono text-xs">{m.carga}</TableCell>
-                <TableCell>{m.ufOrigem}</TableCell>
-                <TableCell className="text-right font-medium">{m.ctes}</TableCell>
-                <TableCell className="text-sm">{new Date(m.dataEmissao).toLocaleDateString("pt-BR")}</TableCell>
-                <TableCell>
-                  {m.status === "encerrado" ? <Badge variant="success">Encerrado</Badge> : <Badge variant="info">Autorizado</Badge>}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <Card className="p-4 mb-4 bg-emerald-50 border-emerald-200 flex items-start gap-3">
+        <Info className="w-4 h-4 text-emerald-700 mt-0.5 shrink-0" />
+        <div className="text-xs text-emerald-900">
+          <p className="font-semibold">Separação automática por estado</p>
+          <p className="mt-0.5">Toda carga com destinos em múltiplas UFs gera <strong>um MDF-e por UF de descarga</strong> — exigência da ANTT. A placa fica travada após o vínculo do primeiro manifesto.</p>
+        </div>
       </Card>
+
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <StatCard label="MDF-es ativos" value={mdfes.filter(m => m.status === "autorizado").length} icon={FileText} iconColor="blue" />
+        <StatCard label="UFs diferentes hoje" value={new Set(mdfes.map(m => m.ufDestino)).size} icon={FileText} iconColor="violet" />
+        <StatCard label="CT-es manifestados" value={mdfes.reduce((s, m) => s + m.cteIds.length, 0)} icon={CheckCircle2} iconColor="emerald" />
+        <StatCard label="Encerrados" value={mdfes.filter(m => m.status === "encerrado").length} icon={CheckCircle2} iconColor="emerald" />
+      </div>
+
+      {[...porCarga.entries()].map(([cargaNumero, items]) => {
+        const carga = cargas.find(c => c.id === items[0].cargaId);
+        return (
+          <Card key={cargaNumero} className="mb-4">
+            <div className="p-4 border-b flex items-center justify-between bg-slate-50">
+              <div>
+                <p className="text-sm font-semibold">Carga {cargaNumero}</p>
+                <p className="text-xs text-muted-foreground">
+                  Saída {carga ? new Date(carga.dataSaida).toLocaleDateString("pt-BR") : "—"} ·
+                  Origem {items[0].ufOrigem} · {items.length} manifesto(s) gerado(s) para {items.length} UF(s)
+                </p>
+              </div>
+              <Badge variant="info">{items.length} MDF-e</Badge>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Número MDF-e</TableHead>
+                  <TableHead>UF origem → destino</TableHead>
+                  <TableHead className="text-right">CT-e no manifesto</TableHead>
+                  <TableHead className="text-right">Peso total</TableHead>
+                  <TableHead className="text-right">Valor frete</TableHead>
+                  <TableHead>Data emissão</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map(m => (
+                  <TableRow key={m.numero}>
+                    <TableCell className="font-mono text-blue-600 font-medium">{m.numero}</TableCell>
+                    <TableCell><span className="font-semibold">{m.ufOrigem}</span> → <span className="font-semibold">{m.ufDestino}</span></TableCell>
+                    <TableCell className="text-right font-medium">{m.cteIds.length}</TableCell>
+                    <TableCell className="text-right">{m.pesoTotal.toLocaleString("pt-BR")} kg</TableCell>
+                    <TableCell className="text-right">{formatCurrency(m.valorTotal)}</TableCell>
+                    <TableCell className="text-sm">{new Date(m.dataEmissao).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell>
+                      {m.status === "encerrado" ? <Badge variant="success">Encerrado</Badge> : <Badge variant="info">Autorizado</Badge>}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        );
+      })}
     </div>
   );
 }

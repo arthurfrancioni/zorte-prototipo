@@ -33,7 +33,7 @@ Abra http://localhost:5173
 - **Dashboard de Transportadora** — drill-down por motorista/placa
 
 ### Fase 1 — Pré-TMS (6)
-- **Importar Teams** — integração com planilha do Microsoft Teams (com timer de sync ao vivo)
+- **Importar OneDrive** — integração com planilha do Microsoft OneDrive (com timer de sync ao vivo)
 - **Pedidos** — listagem, filtros, busca e detalhe
 - **Formação de Carga** — seleção de pedidos + totais em tempo real + progress da carreta ★ tela estrela
 - **Grupos de E-mail** — CRUD + preview do template disparado automaticamente
@@ -64,7 +64,7 @@ src/
 ## Fluxo sugerido para demo com o Rodrigo
 
 1. **Dashboard Geral** — "eis o que vai aparecer logo que você entrar no sistema"
-2. **Importar Teams** — resolver a dor #1 (fim do copy/paste), mostrar o timer de sincronização
+2. **Importar OneDrive** — resolver a dor #1 (fim do copy/paste), mostrar o timer de sincronização
 3. **Pedidos** — a planilha dele virou tela com filtros
 4. **Formação de Carga** ★ — deixar ele clicar nos checkboxes e ver os totais/progress mudando em tempo real
 5. **Grupos de E-mail** — mostrar o template do e-mail automático
